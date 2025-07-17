@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ideas - Suitmedia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .ellipsis-3 {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .parallax-banner {
+            background-attachment: fixed;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .nav-link {
+            position: relative;
+            display: inline-block;
+            padding-bottom: 4px;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0%;
+            height: 2px;
+            background-color: white;
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after,
+        .nav-link.active::after {
+            width: 100%;
+        }
+
+        .hide-header {
+            transform: translateY(-100%);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .show-header {
+            transform: translateY(0);
+            transition: transform 0.3s ease-in-out;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 text-gray-800">
+    <!-- HEADER -->
+    <header id="header"
+        class="fixed top-0 left-0 w-full z-50 p-4 flex justify-between items-center bg-orange-600 text-white transition">
+        <img src="https://i.imgur.com/7uRfuof.png" alt=" Suitmedia Logo" class="h-8">
+        <nav class="space-x-6 text-sm">
+            <a href="#" class="nav-link">Work</a>
+            <a href="#" class="nav-link">About</a>
+            <a href="#" class="nav-link">Services</a>
+            <a href="#" class="nav-link active font-semibold">Ideas</a>
+            <a href="#" class="nav-link">Careers</a>
+            <a href="#" class="nav-link">Contact</a>
+        </nav>
+    </header>
+
+    <!-- BANNER -->
+    <section class="relative">
+        <div class="h-[350px] parallax-banner relative flex flex-col justify-center items-center text-center overflow-hidden"
+            style="background-image: url('https://images.unsplash.com/photo-1521737604893-d14cc237f11d');">
+            <div class="absolute inset-0 bg-black/30 z-0"></div>
+            <h1 class="text-white text-4xl font-bold z-10">Ideas</h1>
+            <p class="text-white mt-2 z-10">Where all our great things begin</p>
+            <div class="absolute bottom-0 left-0 w-full h-20 bg-gray-50"
+                style="clip-path: polygon(0 100%, 100% 0%, 100% 100%, 0% 100%);"></div>
+        </div>
+    </section>
+
+    <!-- CONTENT -->
+    <main class="max-w-7xl mx-auto px-4 py-10 space-y-6">
+        <div class="flex justify-between items-center flex-wrap gap-4">
+            <p id="statusText" class="text-sm text-gray-600">Showing 1 - 10 of 100</p>
+            <div class="flex gap-4 items-center text-sm">
+                <!-- Show per page -->
+                <label for="pageSize" class="whitespace-nowrap">Show per page:</label>
+                <div class="relative">
+                    <select id="pageSize"
+                        class="border border-gray-300 rounded-full px-4 py-2 pr-10 text-sm appearance-none bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="50">50</option>
+                    </select>
+                    <!-- Arrow Icon -->
+                    <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+                        <svg class="w-4 h-4 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M5.23 7.21a.75.75 0 011.06.02L10 11.293l3.71-4.06a.75.75 0 011.1 1.02l-4.25 4.66a.75.75 0 01-1.1 0L5.21 8.27a.75.75 0 01.02-1.06z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Sort order -->
+                <label for="sortOrder" class="whitespace-nowrap">Sort by:</label>
+                <div class="relative">
+                    <select id="sortOrder"
+                        class="border border-gray-300 rounded-full px-4 py-2 pr-10 text-sm appearance-none bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+                        <option value="-published_at">Newest</option>
+                        <option value="published_at">Oldest</option>
+                    </select>
+                    <!-- Arrow Icon -->
+                    <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+                        <svg class="w-4 h-4 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M5.23 7.21a.75.75 0 011.06.02L10 11.293l3.71-4.06a.75.75 0 011.1 1.02l-4.25 4.66a.75.75 0 01-1.1 0L5.21 8.27a.75.75 0 01.02-1.06z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CARD GRID -->
+        <div id="cardContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        </div>
+
+        <!-- PAGINATION -->
+        <div id="pagination" class="flex gap-2 mt-6 flex-wrap"></div>
+    </main>
+
+    <script>
+        const API_URL = 'https://suitmedia-backend.suitdev.com/api/ideas';
+        const cardContainer = document.getElementById('cardContainer');
+        const pagination = document.getElementById('pagination');
+        const statusText = document.getElementById('statusText');
+        const pageSizeSelect = document.getElementById('pageSize');
+        const sortSelect = document.getElementById('sortOrder');
+
+        // Get state from URL query
+        const urlParams = new URLSearchParams(window.location.search);
+        let currentPage = parseInt(urlParams.get('page')) || 1;
+        let pageSize = parseInt(urlParams.get('size')) || 10;
+        let sort = urlParams.get('sort') || '-published_at';
+        let totalItems = 0;
+
+        pageSizeSelect.value = pageSize;
+        sortSelect.value = sort;
+
+        async function fetchIdeas() {
+            const url = `${API_URL}?page[number]=${currentPage}&page[size]=${pageSize}&append[]=small_image&sort=${sort}`;
+            const res = await fetch(url);
+            const data = await res.json();
+            const ideas = data.data;
+            const meta = data.meta;
+
+            totalItems = meta.total;
+            renderStatus();
+            renderCards(ideas);
+            renderPagination(meta);
+            updateURL();
+        }
+
+        function renderCards(items) {
+            cardContainer.innerHTML = '';
+            items.forEach(item => {
+                const image = item.small_image ?? 'https://via.placeholder.com/400x300';
+                const title = item.title;
+                const date = new Date(item.published_at).toLocaleDateString('id-ID', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                });
+
+                const card = document.createElement('div');
+                card.className = 'bg-white shadow rounded overflow-hidden';
+                card.innerHTML = `<img src="${image}" loading="lazy" class="w-full h-48 object-cover" />
+                                  <div class="p-4">
+                                    <p class="text-xs text-gray-500 mb-1">${date}</p>
+                                    <h2 class="text-sm font-semibold ellipsis-3">${title}</h2>
+                                    </div>
+                                `;
+                cardContainer.appendChild(card);
+            });
+        }
+
+        function renderPagination(meta) {
+            const totalPages = meta.last_page;
+            const maxVisible = 5;
+            const half = Math.floor(maxVisible / 2);
+            pagination.innerHTML = '';
+
+            const createButton = (label, page, active = false, disabled = false) => {
+                const btn = document.createElement('button');
+                btn.textContent = label;
+                btn.className = `px-3 py-1 rounded ${active ? 'bg-orange-500 text-white' : 'bg-white border text-gray-700 hover:bg-orange-100'} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`;
+                if (!disabled && !active) {
+                    btn.addEventListener('click', () => {
+                        currentPage = page;
+                        fetchIdeas();
+                    });
+                }
+                return btn;
+            };
+
+            // Previous Button
+            pagination.appendChild(createButton('←', currentPage - 1, false, currentPage === 1));
+
+            // Page Numbers
+            let start = Math.max(1, currentPage - half);
+            let end = Math.min(totalPages, currentPage + half);
+
+            if (currentPage <= half) {
+                end = Math.min(totalPages, maxVisible);
+            } else if (currentPage + half >= totalPages) {
+                start = Math.max(1, totalPages - maxVisible + 1);
+            }
+
+            if (start > 1) {
+                pagination.appendChild(createButton('1', 1));
+                if (start > 2) {
+                    const dots = document.createElement('span');
+                    dots.textContent = '...';
+                    dots.className = 'px-2 text-gray-500';
+                    pagination.appendChild(dots);
+                }
+            }
+
+            for (let i = start; i <= end; i++) {
+                pagination.appendChild(createButton(i, i, i === currentPage));
+            }
+
+            if (end < totalPages) {
+                if (end < totalPages - 1) {
+                    const dots = document.createElement('span');
+                    dots.textContent = '...';
+                    dots.className = 'px-2 text-gray-500';
+                    pagination.appendChild(dots);
+                }
+                pagination.appendChild(createButton(totalPages, totalPages));
+            }
+
+            // Next Button
+            pagination.appendChild(createButton('→', currentPage + 1, false, currentPage === totalPages));
+        }
+
+        function renderStatus() {
+            const from = (currentPage - 1) * pageSize + 1;
+            const to = Math.min(from + pageSize - 1, totalItems);
+            statusText.textContent = `Showing ${from} - ${to} of ${totalItems}`;
+        }
+
+        function updateURL() {
+            const params = new URLSearchParams();
+            params.set('page', currentPage);
+            params.set('size', pageSize);
+            params.set('sort', sort);
+            history.replaceState(null, '', '?' + params.toString());
+        }
+
+        // Event Listeners
+        pageSizeSelect.addEventListener('change', (e) => {
+            pageSize = parseInt(e.target.value);
+            currentPage = 1;
+            fetchIdeas();
+        });
+
+        sortSelect.addEventListener('change', (e) => {
+            sort = e.target.value;
+            currentPage = 1;
+            fetchIdeas();
+        });
+
+        // Sticky Header
+        let lastScrollY = window.scrollY;
+        const header = document.getElementById('header');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > lastScrollY) {
+                header.classList.add('hide-header');
+                header.classList.remove('show-header');
+            } else {
+                header.classList.remove('hide-header');
+                header.classList.add('show-header');
+            }
+            lastScrollY = window.scrollY;
+        });
+
+        fetchIdeas();
+    </script>
+</body>
+
+</html>
